@@ -1,0 +1,14 @@
+.gradle/
+build/
+local.properties
+.idea/
+*.iml
+.DS_Store
+*.jks
+*.keystore
+captures/
+.kotlin/
+# Never commit real genetic data
+*.vcf
+*.vcf.gz
+dna_raw*.txt

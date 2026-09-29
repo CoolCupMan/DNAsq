@@ -1,0 +1,44 @@
+name: Build APKs
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      HAS_KEYSTORE: ${{ secrets.DNASQ_KEYSTORE_BASE64 != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Unit-test DNA core
+        run: ./gradlew :dnacore:test
+
+      - name: Build debug APKs (all lab editions)
+        run: ./gradlew assembleDebug
+
+      - name: Build signed release APKs
+        if: env.HAS_KEYSTORE == 'true'
+        env:
+          KEYSTORE_B64: ${{ secrets.DNASQ_KEYSTORE_BASE64 }}
+          DNASQ_KEYSTORE_PASSWORD: ${{ secrets.DNASQ_KEYSTORE_PASSWORD }}
+          DNASQ_KEY_ALIAS: ${{ secrets.DNASQ_KEY_ALIAS }}
+          DNASQ_KEY_PASSWORD: ${{ secrets.DNASQ_KEY_PASSWORD }}
+        run: |
+          echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/release.jks"
+          DNASQ_KEYSTORE="$RUNNER_TEMP/release.jks" ./gradlew assembleRelease
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dnasq-apks
+          path: app/build/outputs/apk/**/*.apk
+          if-no-files-found: error

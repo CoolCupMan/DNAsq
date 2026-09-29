@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="accessibility_description">DNAsq watches which app comes to the foreground so it can cover apps you have locked with a DNA verification screen. It does not read screen content, keystrokes or notifications.</string>
+</resources>
